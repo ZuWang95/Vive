@@ -7,7 +7,8 @@ Helpful instructions for getting trackers working on Linux are at
 https://gist.github.com/DanielArnett/c9a56c9c7cc0def20648480bca1f6772
 The udev symbolic link trick was crucial in my case.
 """
-
+import zmq
+import json
 import ctypes
 from ctypes import cast, byref, POINTER
 import time
@@ -17,6 +18,37 @@ from open3d_vis_obj import VIVEOpen3DVisualizer
 
 print("Warning: trackers with role 'Handheld object' won't be detected.")
 
+context_zmq = zmq.Context()
+socket1 = context_zmq.socket(zmq.PUB) 
+socket1.bind("tcp://*:5555")  
+
+context_zmq = zmq.Context()
+socket2 = context_zmq.socket(zmq.PUB) 
+socket2.bind("tcp://*:5556")
+
+def send_tracker_data(pose, role,num):
+    
+    data = {
+        "role": role,
+        "position": {
+            "x": pose.position.x,
+            "y": pose.position.y,
+            "z": pose.position.z
+        },
+        "orientation": {
+            "w": pose.orientation.w,
+            "x": pose.orientation.x,
+            "y": pose.orientation.y,
+            "z": pose.orientation.z
+        }
+    }
+    # 将数据转换为 JSON 字符串
+    message = json.dumps(data)
+    # 通过 ZeroMQ 发送数据
+    if(num==0):
+        socket1.send_string(message)
+    else:
+        socket2.send_string(message)
 
 class ContextObject(object):
     def __init__(
@@ -347,7 +379,7 @@ with ContextObject(
     result = enumerateViveTrackerPathsHTCX(instance, n_paths, byref(n_paths), vive_tracker_paths)
     if xr.check_result(result).is_exception():
         raise result
-    print(xr.Result(result), n_paths.value)
+    print('==>', xr.Result(result), n_paths.value)
     # print(*vive_tracker_paths)
 
     # Loop over the render frames
@@ -388,8 +420,10 @@ with ContextObject(
                 )
                 if space_location.location_flags & xr.SPACE_LOCATION_POSITION_VALID_BIT:
                     print(f"{role_strings[index]}: {space_location.pose}")
+                    # send_tracker_data(space_location.pose, role_strings[index])
 
                     if role_strings[index] == 'right_elbow':
+                        send_tracker_data(space_location.pose, role_strings[index],0)
                         if first:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
@@ -398,6 +432,7 @@ with ContextObject(
                             visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                     [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
                     elif role_strings[index] == 'left_elbow':
+                        send_tracker_data(space_location.pose, role_strings[index],1)
                         if first_2:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
