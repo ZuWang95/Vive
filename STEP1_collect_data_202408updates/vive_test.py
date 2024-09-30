@@ -16,18 +16,22 @@ import xr
 import numpy as np
 from open3d_vis_obj import VIVEOpen3DVisualizer
 
-print("Warning: trackers with role 'Handheld object' won't be detected.")
+# Global virable to store the latest vive data
+latest_vive_data_left={}
+latest_vive_data_right={}
+
+
+#print("Warning: trackers with role 'Handheld object' won't be detected.")
 
 context_zmq = zmq.Context()
-socket1 = context_zmq.socket(zmq.PUB) 
-socket1.bind("tcp://*:5555")  
+socket = context_zmq.socket(zmq.REP) 
+socket.bind("tcp://*:5555")  
 
-context_zmq = zmq.Context()
-socket2 = context_zmq.socket(zmq.PUB) 
-socket2.bind("tcp://*:5556")
-
-def send_tracker_data(pose, role,num):
-    
+def update_vive_data(pose, role):
+    """
+    Update latest_vive_data
+    """
+    global latest_vive_data_left, latest_vive_data_right
     data = {
         "role": role,
         "position": {
@@ -42,13 +46,25 @@ def send_tracker_data(pose, role,num):
             "z": pose.orientation.z
         }
     }
-    # 将数据转换为 JSON 字符串
-    message = json.dumps(data)
-    # 通过 ZeroMQ 发送数据
-    if(num==0):
-        socket1.send_string(message)
+    if role == "left_elbow":
+        latest_vive_data_left = data  # Update left tracker data
+    elif role == "right_elbow":
+        latest_vive_data_right = data  # Update right tracker data
+
+
+
+def send_tracker_data(request):
+    """
+    Return the data according to client side request
+    """
+    global latest_vive_data_left, latest_vive_data_right
+    if request == "left_elbow":
+        message = json.dumps(latest_vive_data_left)
+    elif request == "right_elbow":
+        message = json.dumps(latest_vive_data_right)
     else:
-        socket2.send_string(message)
+        message = json.dumps({"error": "Unknown request"})  # Deal with unknown situation
+    socket.send_string(message)  # Return the data back to the client
 
 class ContextObject(object):
     def __init__(
@@ -423,7 +439,7 @@ with ContextObject(
                     # send_tracker_data(space_location.pose, role_strings[index])
 
                     if role_strings[index] == 'right_elbow':
-                        send_tracker_data(space_location.pose, role_strings[index],0)
+                        update_vive_data(space_location.pose, role_strings[index],0)
                         if first:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
@@ -432,7 +448,7 @@ with ContextObject(
                             visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                     [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
                     elif role_strings[index] == 'left_elbow':
-                        send_tracker_data(space_location.pose, role_strings[index],1)
+                        update_vive_data(space_location.pose, role_strings[index],1)
                         if first_2:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
@@ -452,6 +468,10 @@ with ContextObject(
                     found_tracker_count += 1
             if found_tracker_count == 0:
                 print("no trackers found")
+
+            if socket.poll(10):
+                request=socket.recv_string()
+                send_tracker_data(request)
 
         # Slow things down, especially since we are not rendering anything
         # time.sleep(0.5)
