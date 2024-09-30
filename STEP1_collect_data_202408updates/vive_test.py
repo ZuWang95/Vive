@@ -439,7 +439,7 @@ with ContextObject(
                     # send_tracker_data(space_location.pose, role_strings[index])
 
                     if role_strings[index] == 'right_elbow':
-                        update_vive_data(space_location.pose, role_strings[index],0)
+                        update_vive_data(space_location.pose, role_strings[index])
                         if first:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
@@ -448,7 +448,7 @@ with ContextObject(
                             visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                     [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
                     elif role_strings[index] == 'left_elbow':
-                        update_vive_data(space_location.pose, role_strings[index],1)
+                        update_vive_data(space_location.pose, role_strings[index])
                         if first_2:
                             visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
                                                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
@@ -469,7 +469,7 @@ with ContextObject(
             if found_tracker_count == 0:
                 print("no trackers found")
 
-            if socket.poll(10):
+            if socket.poll(1):
                 request=socket.recv_string()
                 send_tracker_data(request)
 
