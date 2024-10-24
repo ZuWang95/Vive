@@ -14,7 +14,7 @@ from ctypes import cast, byref, POINTER
 import time
 import xr
 import numpy as np
-from open3d_vis_obj import VIVEOpen3DVisualizer
+from open3d_vis_obj import VIVEOpen3DVisualizerd
 
 # Global virable to store the latest vive data
 latest_vive_data_left={}
@@ -62,8 +62,15 @@ def send_tracker_data(request):
         message = json.dumps(latest_vive_data_left)
     elif request == "right_elbow":
         message = json.dumps(latest_vive_data_right)
+    elif request == "get_vive_data":
+        combined_data = {
+            "left_elbow": latest_vive_data_left,
+            "right_elbow": latest_vive_data_right
+        }
+        message = json.dumps(combined_data)  # Combine left and right elbow data
     else:
         message = json.dumps({"error": "Unknown request"})  # Deal with unknown situation
+    
     socket.send_string(message)  # Return the data back to the client
 
 class ContextObject(object):
