@@ -14,7 +14,7 @@ from ctypes import cast, byref, POINTER
 import time
 import xr
 import numpy as np
-from open3d_vis_obj import VIVEOpen3DVisualizerd
+from open3d_vis_obj import VIVEOpen3DVisualizer
 
 # Global virable to store the latest vive data
 latest_vive_data_left={}
