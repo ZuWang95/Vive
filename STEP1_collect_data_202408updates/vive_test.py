@@ -14,7 +14,7 @@ from ctypes import cast, byref, POINTER
 import time
 import xr
 import numpy as np
-from open3d_vis_obj import VIVEOpen3DVisualizer
+#from open3d_vis_obj import VIVEOpen3DVisualizer
 
 # Global virable to store the latest vive data
 latest_vive_data_left={}
@@ -307,7 +307,7 @@ class ContextObject(object):
 # visualizer = Open3DVisualizer(translation, quaternion)
 # visualizer.run()
 
-visualizer = VIVEOpen3DVisualizer()
+#visualizer = VIVEOpen3DVisualizer()
 first = True
 first_2 = True
 first_3 = True
@@ -448,29 +448,32 @@ with ContextObject(
                     if role_strings[index] == 'right_elbow':
                         update_vive_data(space_location.pose, role_strings[index])
                         if first:
-                            visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                        [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
+                            # visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                             [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
                             first = False
                         else:
-                            visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                    [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
+                            pass
+                            # visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 0)
                     elif role_strings[index] == 'left_elbow':
                         update_vive_data(space_location.pose, role_strings[index])
                         if first_2:
-                            visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                        [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
+                            # visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                             [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
                             first_2 = False
                         else:
-                            visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                    [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
+                            pass
+                            # visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 1)
                     elif role_strings[index] == 'chest':
                         if first_3:
-                            visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                        [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 2)
+                            # visualizer.set_pose_first([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                             [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 2)
                             first_3 = False
                         else:
-                            visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
-                                                    [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 2)
+                            pass
+                            # visualizer.set_pose([space_location.pose.position.x, space_location.pose.position.y, space_location.pose.position.z], 
+                            #                         [space_location.pose.orientation.w, space_location.pose.orientation.x, space_location.pose.orientation.y, space_location.pose.orientation.z], 2)
 
                     found_tracker_count += 1
             if found_tracker_count == 0:
